@@ -1,0 +1,55 @@
+{
+  "usuarios": [
+    {
+      "id": "1",
+      "nome": "Samuel",
+      "telefone": "1234123523",
+      "email": "samuel@gmail.com"
+    },
+    {
+      "id": "2",
+      "nome": "Eliel",
+      "telefone": "-897446365",
+      "email": "Eliel@gmail.com"
+    },
+    {
+      "id": "3",
+      "nome": "Victor",
+      "telefone": "12315758545",
+      "email": "Victor@gmail.com"
+    },
+    {
+      "id": "4",
+      "nome": "Joantas",
+      "telefone": "091275736",
+      "email": "Jonatas@gmail.com"
+    },
+    {
+      "id": "5",
+      "nome": "Sergio",
+      "telefone": "284091740",
+      "email": "Sergio@gmail.com"
+    }
+  ],
+  "contatos": [
+    {
+      "nome": "Amanda",
+      "email": "amanda@gmail.com",
+      "telefone": "017029357",
+      "id": "E3bEU9fr49M"
+    },
+    {
+      "nome": "Samuel",
+      "email": "samuel@gmail.com",
+      "telefone": "658690",
+      "id": "6hgoWHtsreU"
+    },
+    {
+      "nome": "Everton",
+      "email": "everton#gmail.com",
+      "telefone": "12349801235",
+      "id": "sAM8_ROGeAw"
+    }
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
+}
