@@ -18,16 +18,17 @@ import axios from 'axios';
 import { ScrollView } from 'react-native-web';
 
 
-function HomeScreen({navigation}) {
-  const [usuarios, setUsuarios] = useState([])
+function HomeScreen({navigation, route}) {
+  const {userId} = route.params
+  const [contatos, setContatos] = useState([])
 
   useEffect(()=>{
     loadData()
-  }, [])
+  }, [userId])
   const loadData = async () => {
     try{
-      const response = await axios.get("http://192.168.3.16:3000/contatos")
-      setUsuarios(response.data)
+      const response = await axios.get(`http://192.168.3.16:3000/contatos?userId=${userId}`)
+      setContatos(response.data)
     }catch(error){
       console.log(error)
     }
@@ -37,15 +38,15 @@ function HomeScreen({navigation}) {
 return (
 <View style={styles.container}>
 <View style={styles.containerContatos}>
-{usuarios.map((user)=>(
-  <Pressable key={user.id} onPress={()=>{navigation.navigate('alterarContato', 
-   {id:user.id, username:user.nome, telefone : user.telefone, email : user.email})}}>
+{contatos.map((cont)=>(
+  <Pressable key={cont.id} onPress={()=>{navigation.navigate('alterarContato', 
+   {id:cont.id, username:cont.nome, telefone : cont.telefone, email : cont.email, userId : userId})}}>
   <View style = {styles.AlingImage}>
    <Image source={{uri:"https://img.icons8.com/ios-filled/50/FFFFFF/user-male-circle.png"}} style={styles.Image}/>
 
   <View style = {styles.AlignInput}>
-          <Text style = {[styles.Text, styles.SpaceInput]}>{user.nome}</Text>
-          <Text style = {[styles.Text, styles.SpaceInput]}>{user.telefone}</Text>
+          <Text style = {[styles.Text, styles.SpaceInput]}>{cont.nome}</Text>
+          <Text style = {[styles.Text, styles.SpaceInput]}>{cont.telefone}</Text>
           
   </View>
 </View>
@@ -58,6 +59,29 @@ return (
 }
 
 function LoginScreen({navigation}) {
+  const [email, setEmail] = useState('')
+  const [senha, setSenha] = useState('')
+
+  const loadUser = async () =>{
+    try{
+    const response = await axios.get(`http://192.168.3.16:3000/usuarios?email=${email}&senha=${senha}`)
+    
+    
+    if (response.data.length > 0){
+      const user = response.data[0]
+
+      navigation.navigate('Home', {
+        userId : user.id
+      })
+
+    }else{
+      alert("Email ou senha inválidos")
+    }
+
+    }catch(error){
+      console.log(error)
+    }
+  }
 return (
 <View style={styles.container}>
       <View style = {styles.contLogin}>
@@ -65,19 +89,19 @@ return (
           
           <View style = {styles.AlignInput}>
           <Text style = {styles.Text}>Email</Text>
-          <TextInput style = {styles.input} placeholder='Escreva aqui'/>
+          <TextInput onChangeText={setEmail} style = {styles.input} placeholder='Escreva aqui'/>
           </View>
 
           <View style = {styles.AlignInput}>
           <Text style = {styles.Text}>Senha</Text>
-          <TextInput style = {styles.input} placeholder='Escreva aqui'/>
+          <TextInput onChangeText={setSenha} style = {styles.input} placeholder='Escreva aqui'/>
           </View>
 
-          <TouchableOpacity onPress={() =>{navigation.navigate('Home')}} style = {styles.Button}>
+          <TouchableOpacity onPress={loadUser} style = {styles.Button}>
             <Text style = {styles.TextButton}>Login</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={()=>{navigation.navigate('CadastroUser')}} style = {styles.Button}>
+          <TouchableOpacity onPress={()=> navigation.navigate("CadastroUser")} style = {styles.Button}>
             <Text style = {styles.TextButton}>Cadastrar</Text>
           </TouchableOpacity>
       </View>
@@ -96,10 +120,10 @@ function CadastroUserScreen({navigation}) {
         nome : nome,
         email : email,
         cpf: cpf,
-        senha : senha
+        senha : senha,
       })
 
-      navigation.navigate("Home")
+      navigation.navigate("Login")
     }catch(error){
       console.log(error)
     }
@@ -135,7 +159,8 @@ return (
     </View>
 )}
 
-function CadastroContatoScreen({navigation}) {
+function CadastroContatoScreen({navigation, route}) {
+  const {userId} = route.params
   const [nome, setNome] = useState("")
   const [email, setEmail] = useState('')
   const [telefone, setTelefone] = useState("")
@@ -146,10 +171,11 @@ function CadastroContatoScreen({navigation}) {
       {
         nome: nome,
         email : email,
-        telefone : telefone
+        telefone : telefone,
+        userId : userId
       })
 
-      navigation.navigate("Home")
+      navigation.navigate("Home", {userId : userId})
     }catch(error){
       console.log(error)
     }
@@ -183,8 +209,8 @@ return (
 )}
 
 
-function EditarContatoScreen({route}) {
-  let {id, username, telefone, email} = route.params
+function EditarContatoScreen({navigation, route}) {
+  let {id, username, telefone, email, userId} = route.params
   const [nome, setNome] = useState(username)
   const [Telefone, setTelefone] = useState(telefone)
   const [Email, setEmail] = useState(email)
@@ -195,10 +221,11 @@ function EditarContatoScreen({route}) {
         {
           nome,
           email: Email,
-          telefone : Telefone
+          telefone : Telefone,
+          userId : userId
         },
       )
-      navigation.navigate("Home")
+      navigation.navigate("Home", {userId : userId})
 
     }catch(error){
       console.log(error)
@@ -208,7 +235,7 @@ function EditarContatoScreen({route}) {
   const excluirContato = async (id) =>{
     try{
       await axios.delete(`http://192.168.3.16:3000/contatos/${id}`)
-      navigation.navigate("Home")
+      navigation.navigate("Home", {userId : userId})
     }
       catch(error){
         console.log(error)
@@ -252,11 +279,11 @@ return (
 <NavigationContainer>
 <Stack.Navigator initialRouteName='Login'>
 <Stack.Screen name="Home" component={HomeScreen} 
-options={({navigation}) => ({
+options={({navigation, route}) => ({
     headerTitleAlign:'center',
    headerTitle: 'Lista de contatos',
    headerRight: ()=>(
-      <TouchableOpacity onPress={()=>{navigation.navigate('CadastroContato')}}>
+      <TouchableOpacity onPress={()=>{navigation.navigate('CadastroContato',{userId : route?.params?.userId})}}>
         <Ionicons name='add' size={28} color='black'/>
       </TouchableOpacity>
    ),
